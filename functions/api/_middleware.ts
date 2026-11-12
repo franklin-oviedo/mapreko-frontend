@@ -23,5 +23,5 @@ export async function onRequest({ request, env }: PagesContext): Promise<Respons
   const destination = new URL(request.url);
   destination.protocol = apiOrigin.protocol;
   destination.host = apiOrigin.host;
-  return fetch(new Request(destination, request));
+  return fetch(new Request(destination, request), { redirect: 'manual' });
 }
