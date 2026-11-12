@@ -1,0 +1,80 @@
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+h2 {
+  margin: 0.6rem 0 0;
+  font-size: 1.65rem;
+}
+h2:focus {
+  outline: none;
+}
+fieldset {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.field + .field,
+.form-grid + .field {
+  margin-top: 1.2rem;
+}
+.form-grid {
+  margin-top: 1.2rem;
+  gap: 1rem;
+}
+.form-grid .field {
+  margin-top: 0;
+  min-width: 0;
+}
+.interval-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.interval-control input {
+  width: 5rem;
+}
+.interval-control span {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+  font: inherit;
+  color: var(--ink);
+  padding: 0.7rem;
+  border: 1px solid #96a798;
+  border-radius: 0.35rem;
+}
+.dialog-actions {
+  margin-top: 1.8rem;
+  padding-top: 1.3rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.icon-button {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: white;
+  color: var(--forest);
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  :host ::ng-deep dialog {
+    padding: 1.2rem;
+  }
+  .dialog-actions .button {
+    flex: 1;
+  }
+}

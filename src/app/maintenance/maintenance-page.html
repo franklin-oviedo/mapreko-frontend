@@ -1,0 +1,433 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow-dark">ORGANIZA · PREVIENE · DA SEGUIMIENTO</p>
+    <h1 #pageHeading tabindex="-1">Plan de mantenimiento</h1>
+    <p class="muted">Cada tarea a tiempo. Cada propiedad, en buenas manos.</p>
+  </div>
+  <button
+    class="button primary"
+    type="button"
+    [disabled]="!canWrite()"
+    (click)="taskDialog().open('task', propertyId())"
+  >
+    <app-icon name="plus" /> Nueva tarea
+  </button>
+</div>
+@if (error()) {
+  <p class="notice" role="alert">{{ error() }}</p>
+}
+@if (success()) {
+  <p class="success" role="status">{{ success() }}</p>
+}
+@if (!canWrite() && properties().length) {
+  <p class="notice">
+    Tu acceso es de solo lectura. Puedes consultar los planes, pero no crear ni modificar.
+  </p>
+}
+@if (state().status === 'loading') {
+  <section class="loading-state" role="status">Cargando tus planes y calendario…</section>
+} @else if (state(); as state) {
+  @if (state.status === 'error') {
+    <section class="panel error-panel">
+      <h2>No pudimos cargar tus planes</h2>
+      <p class="notice" role="alert">{{ state.message }}</p>
+      <button class="button primary" type="button" (click)="refresh()">Reintentar</button>
+    </section>
+  }
+}
+@if (data(); as result) {
+  <section class="maintenance-toolbar" aria-label="Filtros de mantenimiento">
+    <div class="maintenance-filters">
+      <label class="sr-only" for="plan-property-filter">Filtrar por propiedad</label>
+      <select
+        id="plan-property-filter"
+        #propertySelect
+        [value]="propertyId()"
+        (change)="propertyId.set(propertySelect.value)"
+      >
+        <option value="">Todas las propiedades</option>
+        @for (property of properties(); track property.id) {
+          <option [value]="property.id">{{ property.name }}</option>
+        }
+      </select>
+      @if (mode() === 'list') {
+        <label class="sr-only" for="task-status-filter">Filtrar por estado</label>
+        <select
+          id="task-status-filter"
+          #statusSelect
+          [value]="statusFilter()"
+          (change)="setStatusFilter(statusSelect.value)"
+        >
+          <option value="">Estado: todos</option>
+          <option value="pending">Pendiente</option>
+          <option value="in_progress">En curso</option>
+          <option value="completed">Completada</option>
+        </select>
+        <label class="sr-only" for="task-assignee-filter">Filtrar por responsable</label>
+        <select
+          id="task-assignee-filter"
+          #assigneeSelect
+          [value]="assigneeFilter()"
+          (change)="assigneeFilter.set(assigneeSelect.value)"
+        >
+          <option value="">Responsable</option>
+          @for (assignee of assignees(); track assignee.id) {
+            <option [value]="assignee.id">{{ assignee.name }}</option>
+          }
+        </select>
+      }
+    </div>
+    <div class="view-switch" role="group" aria-label="Vista de mantenimiento">
+      <button
+        type="button"
+        [class.selected]="mode() === 'list'"
+        [attr.aria-pressed]="mode() === 'list'"
+        (click)="mode.set('list')"
+      >
+        Lista
+      </button>
+      <button
+        type="button"
+        [class.selected]="mode() === 'plans'"
+        [attr.aria-pressed]="mode() === 'plans'"
+        (click)="mode.set('plans')"
+      >
+        Planes
+      </button>
+      <button
+        type="button"
+        [class.selected]="mode() === 'calendar'"
+        [attr.aria-pressed]="mode() === 'calendar'"
+        (click)="mode.set('calendar')"
+      >
+        Calendario
+      </button>
+    </div>
+  </section>
+  @if (mode() === 'list') {
+    <section class="week-panel" aria-label="Semana de mantenimiento">
+      <header>
+        <h2>{{ monthLabel() }}</h2>
+        <div class="week-controls">
+          <button type="button" aria-label="Semana anterior" (click)="moveWeek(-1)">
+            <app-icon name="chevron" />
+          </button>
+          <button
+            type="button"
+            class="inline-link"
+            [attr.aria-pressed]="!dayFilter()"
+            (click)="dayFilter.set('')"
+          >
+            Toda la semana
+          </button>
+          <button type="button" aria-label="Semana siguiente" (click)="moveWeek(1)">
+            <app-icon name="chevron" />
+          </button>
+        </div>
+      </header>
+      <div class="week-strip">
+        @for (day of weekDays(); track day.key) {
+          <button
+            type="button"
+            [class.selected]="dayFilter() === day.key || (!dayFilter() && todayKey() === day.key)"
+            [attr.aria-current]="todayKey() === day.key ? 'date' : null"
+            [attr.aria-pressed]="dayFilter() === day.key"
+            (click)="selectDay(day.key)"
+          >
+            <span>{{ day.label }}</span>
+            <div>
+              <strong>{{ day.number }}</strong><small
+                >{{ dayCount(day.key) }} {{ dayCount(day.key) === 1 ? 'tarea' : 'tareas' }}</small
+              >
+            </div>
+            <span class="sr-only">, {{ day.key }}</span>
+          </button>
+        }
+      </div>
+    </section>
+    <div class="task-layout">
+      <section class="content-panel task-list" aria-labelledby="week-tasks-title">
+        <header class="content-heading">
+          <h2 id="week-tasks-title">
+            {{ dayFilter() ? 'Tareas del día' : 'Tareas de la semana' }}
+          </h2>
+          <span class="results-count">{{ weekActivities().length }} tareas</span>
+        </header>
+        <div class="task-tabs" role="group" aria-label="Estado de las tareas">
+          <button
+            type="button"
+            [class.selected]="taskTab() === 'pending'"
+            [attr.aria-pressed]="taskTab() === 'pending'"
+            (click)="setTaskTab('pending')"
+          >
+            Pendientes · {{ pendingActivities().length }}
+          </button>
+          <button
+            type="button"
+            [class.selected]="taskTab() === 'completed'"
+            [attr.aria-pressed]="taskTab() === 'completed'"
+            (click)="setTaskTab('completed')"
+          >
+            Completadas · {{ completedActivities().length }}
+          </button>
+        </div>
+        <ul class="weekly-tasks">
+          @for (activity of shownActivities(); track activity.id) {
+            <li>
+              <button
+                type="button"
+                class="task-row"
+                [class.selected]="selectedActivity()?.id === activity.id"
+                [attr.aria-pressed]="selectedActivity()?.id === activity.id"
+                (click)="selectedActivityId.set(activity.id)"
+              >
+                <span
+                  class="task-check"
+                  [class.done]="activity.status === 'completed'"
+                  aria-hidden="true"
+                >
+                  @if (activity.status === 'completed') {
+                    <app-icon name="check" />
+                  }
+                </span>
+                <span class="task-copy">
+                  <strong>{{ activity.title }}</strong>
+                  <span>{{ activity.propertyName }}</span>
+                  <small
+                    >{{ dateLabel(activity.dueAt, activity.timeZone) }} ·
+                    {{ assigneeLabel(activity) }}</small
+                  >
+                </span>
+                <span
+                  class="task-status"
+                  [class.overdue]="isOverdue(activity)"
+                  [class.done]="activity.status === 'completed'"
+                  [class.in-progress]="activity.status === 'in_progress' && !isOverdue(activity)"
+                  >{{ activityStatus(activity) }}</span
+                >
+              </button>
+            </li>
+          } @empty {
+            <li class="empty-state">
+              <app-icon name="calendar" />
+              <h3>No hay tareas con estos filtros.</h3>
+              <p>Consulta otra semana o crea una tarea para organizar el cuidado de tu espacio.</p>
+              <button type="button" class="inline-link" (click)="clearTaskFilters()">
+                Limpiar filtros
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
+      <aside class="content-panel task-detail" aria-labelledby="task-detail-title">
+        <p class="eyebrow-dark">DETALLE DE LA TAREA</p>
+        @if (selectedActivity(); as activity) {
+          <span class="task-status" [class.overdue]="isOverdue(activity)">{{
+            activityStatus(activity)
+          }}</span>
+          <h2 id="task-detail-title">{{ activity.title }}</h2>
+          <p class="muted">{{ activity.propertyName }}</p>
+          <dl>
+            <div>
+              <dt>Responsable</dt>
+              <dd>{{ assigneeLabel(activity) }}</dd>
+            </div>
+            <div>
+              <dt>Fecha límite</dt>
+              <dd>
+                {{
+                  dateLabel(activity.dueAt, activity.timeZone, {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                }}
+              </dd>
+            </div>
+            @if (selectedPlan(); as plan) {
+              <div>
+                <dt>Frecuencia</dt>
+                <dd>{{ recurrence(plan) }}</dd>
+              </div>
+            }
+            <div>
+              <dt>Prioridad</dt>
+              <dd>{{ priorityLabel(activity.priority) }}</dd>
+            </div>
+          </dl>
+          @if (activity.description) {
+            <p class="task-description">{{ activity.description }}</p>
+          }
+          @if (activity.tasks.length) {
+            <h3>Pasos de mantenimiento</h3>
+            <ul class="task-steps">
+              @for (step of activity.tasks; track step.id) {
+                <li>
+                  <span class="task-check" [class.done]="step.completed" aria-hidden="true">
+                    @if (step.completed) {
+                      <app-icon name="check" />
+                    }</span
+                  ><span
+                    >{{ step.title }}
+                    @if (step.instructions) {
+                      <small>{{ step.instructions }}</small>
+                    }
+                  </span>
+                </li>
+              }
+            </ul>
+          }
+          @if (activity.canWrite && activity.status !== 'completed') {
+            <button
+              type="button"
+              class="button primary"
+              [disabled]="changing() !== null"
+              (click)="complete(activity)"
+            >
+              {{ changing() === activity.id ? 'Guardando…' : 'Marcar como completada' }}
+            </button>
+          } @else if (!activity.canWrite) {
+            <p class="muted">Acceso de consulta. Tu rol no permite completar esta tarea.</p>
+          }
+        } @else {
+          <h2 id="task-detail-title">Todo empieza con una pequeña acción.</h2>
+          <p class="muted">
+            Selecciona una tarea para ver su responsable, fecha y pasos de mantenimiento.
+          </p>
+        }
+      </aside>
+    </div>
+  } @else if (mode() === 'plans') {
+    <section class="plan-metrics" aria-label="Resumen de mantenimiento">
+      <article>
+        <span>Planes activos</span><strong>{{ result.data.metrics.active }}</strong>
+      </article>
+      <article>
+        <span>Próximos este mes</span><strong>{{ result.data.metrics.dueThisMonth }}</strong>
+      </article>
+      <article>
+        <span>Completadas este mes</span
+        ><strong>{{ result.data.metrics.completedThisMonth }}</strong>
+      </article>
+      <article>
+        <span>En pausa</span><strong>{{ result.data.metrics.paused }}</strong>
+      </article>
+    </section>
+    <section class="content-panel" aria-labelledby="plans-title">
+      <header class="content-heading">
+        <div>
+          <h2 id="plans-title">Tus planes preventivos</h2>
+          <p>Una actividad sencilla, programada con anticipación.</p>
+        </div>
+        <button
+          type="button"
+          class="inline-link"
+          [disabled]="!canWrite()"
+          (click)="createDialog().open()"
+        >
+          <app-icon name="plus" /> Crear plan
+        </button>
+      </header>
+      @if (plans().length) {
+        <div class="plan-grid">
+          @for (plan of plans(); track plan.id) {
+            <article class="plan-card" [class.paused]="plan.status === 'paused'">
+              <header class="plan-card-top">
+                <span class="status-tag" [class.paused-tag]="plan.status === 'paused'">
+                  <span class="status-dot"></span
+                  >{{ plan.status === 'active' ? 'ACTIVO' : 'EN PAUSA' }}
+                </span>
+                <span
+                  class="priority-tag"
+                  [class.priority-high]="plan.priority === 'high' || plan.priority === 'urgent'"
+                  >{{ priorityLabel(plan.priority) }}</span
+                >
+              </header>
+              <h3>{{ plan.title }}</h3>
+              <p class="property-name"><app-icon name="home" />{{ plan.propertyName }}</p>
+              @if (plan.description) {
+                <p class="plan-description">{{ plan.description }}</p>
+              }
+              <div class="plan-activity">
+                <span class="activity-check"><app-icon name="check" /></span>
+                <span
+                  ><strong>{{ plan.tasks[0]?.title || plan.title }}</strong>
+                  @if (plan.tasks[0]?.instructions) {
+                    <small>{{ plan.tasks[0].instructions }}</small>
+                  }
+                </span>
+              </div>
+              <div class="plan-schedule">
+                <span><app-icon name="calendar" />{{ recurrence(plan) }}</span>
+                <span
+                  ><app-icon name="clock" />Próxima:
+                  {{
+                    dateLabel(plan.nextDueAt, plan.timeZone, {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  }}</span
+                >
+              </div>
+              @if (plan.estimatedMinutes) {
+                <p class="duration">Duración estimada: {{ plan.estimatedMinutes }} min</p>
+              }
+              <footer class="plan-card-actions">
+                <button
+                  type="button"
+                  class="inline-link"
+                  [disabled]="!plan.canWrite || changing() === plan.id"
+                  (click)="toggle(plan)"
+                >
+                  {{
+                    changing() === plan.id
+                      ? 'Guardando…'
+                      : plan.status === 'active'
+                        ? 'Pausar plan'
+                        : 'Reactivar plan'
+                  }}
+                </button>
+                <span
+                  >{{ plan.tasks.length }}
+                  {{ plan.tasks.length === 1 ? 'actividad' : 'actividades' }}</span
+                >
+              </footer>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <span class="empty-icon"><app-icon name="calendar" /></span>
+          <h3>
+            {{
+              dashboard.search()
+                ? 'No encontramos planes con esa búsqueda.'
+                : 'Todavía no tienes planes de mantenimiento.'
+            }}
+          </h3>
+          <p>Programa una actividad periódica para anticiparte a los imprevistos.</p>
+          @if (!dashboard.search() && canWrite()) {
+            <button class="button primary" type="button" (click)="createDialog().open()">
+              <app-icon name="plus" /> Crear mi primer plan
+            </button>
+          }
+        </div>
+      }
+    </section>
+  } @else {
+    <app-maintenance-calendar
+      [cells]="calendarCells()"
+      [activities]="activities()"
+      [monthLabel]="monthLabel()"
+      [today]="todayKey()"
+      (moved)="$event === 0 ? month.set(currentMonth()) : moveMonth($event)"
+    />
+  }
+  <p class="schedule-note">
+    <app-icon name="help" />Por ahora, cada plan guarda su frecuencia y próxima fecha, pero las
+    tareas futuras todavía no se generan automáticamente.
+  </p>
+}
+<app-plan-dialog [properties]="properties()" (created)="created()" />
+<app-create-dialog [properties]="properties()" (created)="taskCreated()" />

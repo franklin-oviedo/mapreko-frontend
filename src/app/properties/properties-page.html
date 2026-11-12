@@ -1,0 +1,163 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow-dark">CUIDA · ORGANIZA · PREVIENE</p>
+    <h1 #pageHeading tabindex="-1">Propiedades</h1>
+    <p class="muted">Cada espacio importa. Su cuidado empieza aquí.</p>
+  </div>
+  @if (canCreateProperty()) {
+    <button class="button primary" type="button" (click)="createDialog().open('property')">
+      <app-icon name="plus" /> Nueva propiedad
+    </button>
+  }
+</header>
+@if (success()) {
+  <p class="success" role="status">{{ success() }}</p>
+}
+@if (state().status === 'loading') {
+  <p class="loading-state" role="status">Cargando tus propiedades…</p>
+} @else if (state(); as state) {
+  @if (state.status === 'error') {
+    <section class="panel error-state">
+      <h2>No pudimos cargar tus propiedades</h2>
+      <p class="notice" role="alert">{{ state.message }}</p>
+      <button class="button primary" type="button" (click)="refresh()">Reintentar</button>
+    </section>
+  }
+}
+@if (summary(); as data) {
+  <section class="property-overview" aria-label="Resumen de propiedades">
+    <article>
+      <span>Propiedades <app-icon name="home" /></span
+      ><strong>{{ data.metrics.propertyCount }}</strong>
+    </article>
+    <article>
+      <span>Residenciales <app-icon name="building" /></span
+      ><strong>{{ data.metrics.buildingCount }}</strong>
+    </article>
+    <article>
+      <span>Viviendas <app-icon name="home" /></span
+      ><strong>{{ data.metrics.housingCount }}</strong>
+    </article>
+    <article>
+      <span>Otras <app-icon name="grid" /></span><strong>{{ data.metrics.otherCount }}</strong>
+    </article>
+  </section>
+  <section class="property-filters" aria-label="Filtros de propiedades">
+    <div class="kind-filters" role="group" aria-label="Filtrar por tipo">
+      <button
+        type="button"
+        [class.selected]="filter() === 'all'"
+        [attr.aria-pressed]="filter() === 'all'"
+        (click)="filter.set('all')"
+      >
+        Todas <span>{{ counts().all }}</span>
+      </button>
+      @for (kind of kindFilters; track kind) {
+        <button
+          type="button"
+          [class.selected]="filter() === kind"
+          [attr.aria-pressed]="filter() === kind"
+          (click)="filter.set(kind)"
+        >
+          {{ kindLabel(kind) }} <span>{{ countForKind(kind) }}</span>
+        </button>
+      }
+    </div>
+    <span class="property-count"
+      >{{ visibleProperties().length }}
+      {{ visibleProperties().length === 1 ? 'propiedad' : 'propiedades' }}</span
+    >
+  </section>
+  @if (visibleProperties().length) {
+    <section class="property-grid" aria-label="Tus propiedades">
+      @for (property of visibleProperties(); track property.id) {
+        <article class="property-card">
+          <header class="property-card-heading">
+            <span class="property-icon" aria-hidden="true">
+              <app-icon [name]="property.kind === 'building' ? 'building' : 'home'" />
+            </span>
+            <span class="kind-label">{{ kindLabel(property.kind) }}</span>
+          </header>
+          <h2>{{ property.name }}</h2>
+          <p class="workspace-label">{{ workspaceName(property.workspaceId) }}</p>
+          <div class="property-care">
+            <div class="care-heading">
+              <span>Cuidado preventivo este mes</span>
+              @if (completion(property) !== null) {
+                <strong>{{ completion(property) }}%</strong>
+              } @else {
+                <strong aria-label="Sin tareas preventivas">—</strong>
+              }
+            </div>
+            @if (completion(property) !== null) {
+              <progress
+                [value]="completion(property) ?? 0"
+                max="100"
+                [attr.aria-label]="'Cumplimiento preventivo de ' + property.name"
+              ></progress>
+              <p>
+                {{ property.preventiveCompleted }} de {{ property.preventiveTotal }} tareas
+                completadas
+              </p>
+            } @else {
+              <p>Sin tareas preventivas programadas este mes.</p>
+            }
+          </div>
+          <footer class="property-card-footer">
+            @if (property.canCreateTask) {
+              <button
+                class="inline-link"
+                type="button"
+                (click)="createDialog().open('task', property.id)"
+              >
+                <app-icon name="plus" /> Crear tarea
+              </button>
+            } @else {
+              <span class="read-only"><app-icon name="help" /> Acceso de consulta</span>
+            }
+            <span class="timezone">Zona horaria: {{ property.timeZone }}</span>
+          </footer>
+        </article>
+      }
+    </section>
+  } @else {
+    <section class="empty-state">
+      <span class="empty-icon"><app-icon name="home" /></span>
+      <h2>
+        {{
+          client.search() || filter() !== 'all'
+            ? 'No encontramos propiedades con esos filtros.'
+            : 'Aún no tienes propiedades registradas.'
+        }}
+      </h2>
+      <p>
+        {{
+          client.search() || filter() !== 'all'
+            ? 'Prueba con otra búsqueda o selecciona un tipo distinto.'
+            : 'Registra una propiedad para empezar a organizar su cuidado.'
+        }}
+      </p>
+      @if (client.search() || filter() !== 'all') {
+        <button
+          class="button secondary"
+          type="button"
+          (click)="client.search.set(''); filter.set('all')"
+        >
+          Limpiar filtros
+        </button>
+      } @else if (canCreateProperty()) {
+        <button class="button primary" type="button" (click)="createDialog().open('property')">
+          <app-icon name="plus" /> Registrar propiedad
+        </button>
+      } @else {
+        <p class="muted small">
+          Pide a la persona administradora de tu espacio que registre propiedades.
+        </p>
+      }
+    </section>
+  }
+  <p class="data-note">
+    <app-icon name="help" />Los datos y las acciones disponibles dependen de tu rol en cada espacio.
+  </p>
+}
+<app-create-dialog [properties]="properties()" (created)="created($event)" />

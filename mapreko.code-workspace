@@ -1,0 +1,33 @@
+{
+  "folders": [
+    { "name": "mapreko-frontend", "path": "." },
+    { "name": "mapreko-backend", "path": "..\\mapreko-backend" }
+  ],
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "MAPREKO: frontend",
+        "type": "shell",
+        "command": "npm run start",
+        "options": { "cwd": "${workspaceFolder:mapreko-frontend}" },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "MAPREKO: backend",
+        "type": "shell",
+        "command": "npm run start:dev",
+        "options": { "cwd": "${workspaceFolder:mapreko-backend}" },
+        "isBackground": true,
+        "problemMatcher": []
+      },
+      {
+        "label": "MAPREKO: iniciar ambos",
+        "dependsOn": ["MAPREKO: frontend", "MAPREKO: backend"],
+        "dependsOrder": "parallel",
+        "problemMatcher": []
+      }
+    ]
+  }
+}

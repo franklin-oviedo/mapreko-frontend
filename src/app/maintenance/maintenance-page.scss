@@ -1,0 +1,321 @@
+.maintenance-filters,
+.view-switch,
+.week-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.view-switch button,
+.week-controls > button {
+  min-height: 2.5rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--cream);
+  color: var(--muted);
+  padding: 0.5rem 0.85rem;
+  font-size: 0.7rem;
+}
+.view-switch .selected {
+  background: var(--lime);
+  color: var(--forest);
+}
+.week-panel {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+.week-panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+}
+.week-panel h2 {
+  font-size: 0.9rem;
+  text-transform: capitalize;
+  margin: 0;
+}
+.week-controls > button[aria-label='Semana anterior'] app-icon {
+  transform: rotate(90deg);
+}
+.week-controls > button[aria-label='Semana siguiente'] app-icon {
+  transform: rotate(-90deg);
+}
+.week-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+.week-strip button {
+  position: relative;
+  background: var(--cream);
+  color: var(--ink);
+  text-align: left;
+  border: 0;
+  border-radius: 0.35rem;
+  padding: 0.8rem;
+}
+.week-strip button.selected {
+  background: var(--forest);
+  color: white;
+}
+.week-strip button > span {
+  font-size: 0.55rem;
+  text-transform: uppercase;
+}
+.week-strip button div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+  flex-wrap: wrap;
+}
+.week-strip strong {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.week-strip small {
+  font-size: 0.55rem;
+}
+.task-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.content-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-bottom: 0.75rem;
+}
+.content-heading h2 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+.content-heading p,
+.results-count {
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+.task-tabs {
+  display: flex;
+  background: var(--cream);
+  border-radius: 0.35rem;
+  padding: 0.2rem;
+}
+.task-tabs button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.7rem;
+}
+.task-tabs .selected {
+  background: white;
+  color: var(--forest);
+  border-radius: 0.3rem;
+  box-shadow: 0 1px 4px #173c2e0d;
+}
+.weekly-tasks,
+.task-steps {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+.task-row {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 0.65rem;
+  border: 0;
+  background: white;
+  border-radius: 0.35rem;
+  text-align: left;
+  color: var(--ink);
+}
+.task-row.selected {
+  background: var(--surface-soft, #e8f0db);
+}
+.task-check {
+  display: inline-grid;
+  place-items: center;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid #9caa99;
+  border-radius: 0.2rem;
+  flex-shrink: 0;
+}
+.task-check.done {
+  background: #1b715a;
+  border-color: #1b715a;
+  color: white;
+}
+.task-check app-icon {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+.task-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  flex: 1;
+}
+.task-copy strong {
+  font-size: 0.72rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.task-copy span,
+.task-copy small {
+  color: var(--muted);
+  font-size: 0.6rem;
+}
+.task-status {
+  display: inline-block;
+  background: #faf3da;
+  color: #76612a;
+  font-size: 0.6rem;
+  padding: 0.25rem 0.4rem;
+  border-radius: 0.2rem;
+}
+.task-status.overdue {
+  background: #fbede7;
+  color: #9b4936;
+}
+.task-status.done,
+.task-status.in-progress {
+  background: #e9f2e7;
+  color: #356047;
+}
+.task-detail h2 {
+  font-size: 1.15rem;
+  margin: 0.8rem 0 0.4rem;
+  overflow-wrap: anywhere;
+}
+.task-detail p,
+.task-description {
+  font-size: 0.7rem;
+}
+.task-detail dl {
+  margin: 1.6rem 0;
+  display: grid;
+  gap: 1.1rem;
+}
+.task-detail dt {
+  color: var(--muted);
+  font-size: 0.6rem;
+  margin-bottom: 0.25rem;
+}
+.task-detail dd {
+  margin: 0;
+  font-size: 0.7rem;
+}
+.task-detail h3 {
+  font-size: 0.75rem;
+}
+.task-steps li {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.75rem 0;
+  font-size: 0.68rem;
+}
+.task-steps small {
+  display: block;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+.task-detail > .button {
+  width: 100%;
+  margin-top: 1.2rem;
+}
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.plan-card {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+}
+.plan-card-top,
+.plan-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  font-size: 0.65rem;
+}
+.status-tag {
+  color: #356047;
+}
+.paused-tag {
+  color: #76612a;
+}
+.priority-tag {
+  background: var(--cream);
+  padding: 0.3rem;
+  border-radius: 0.2rem;
+}
+.priority-high {
+  background: #fbede7;
+  color: #9b4936;
+}
+.plan-card h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.9rem;
+}
+.property-name,
+.plan-description,
+.plan-schedule,
+.duration {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+.plan-activity {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.8rem;
+  background: var(--cream);
+  font-size: 0.68rem;
+}
+.plan-activity small,
+.plan-schedule span {
+  display: block;
+  margin-top: 0.4rem;
+}
+.plan-card-actions {
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+}
+@media (max-width: 900px) {
+  .task-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .week-strip {
+    overflow-x: auto;
+    grid-template-columns: repeat(7, minmax(4.3rem, 1fr));
+  }
+  .week-strip button {
+    padding: 0.6rem;
+  }
+  .plan-grid {
+    grid-template-columns: 1fr;
+  }
+  .task-row {
+    flex-wrap: wrap;
+  }
+  .task-status {
+    margin-left: auto;
+  }
+}

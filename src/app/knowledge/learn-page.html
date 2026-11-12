@@ -1,0 +1,188 @@
+@if (!slug()) {
+  <div class="learn-page">
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow-dark">CONOCIMIENTO QUE CUIDA TU HOGAR</p>
+        <h1>Aprende. Hazlo con confianza.</h1>
+        <p class="muted">Mantenimiento sencillo, explicado paso a paso y sin complicaciones.</p>
+      </div>
+    </header>
+    <section class="learn-hero" aria-labelledby="learn-hero-title">
+      <div>
+        <span class="hero-tag">TÚ PUEDES HACERLO</span>
+        <h2 id="learn-hero-title">Un hogar cuidado empieza contigo.</h2>
+        <p>
+          Aprende a identificar problemas, crear una rutina y saber<br />cuándo es mejor llamar a un
+          profesional.
+        </p>
+        <button type="button" class="button" (click)="explore()">
+          Explorar las guías <app-icon name="arrow" />
+        </button>
+      </div>
+      <aside class="hero-tip" aria-label="Consejo de mantenimiento">
+        <app-icon name="leaf" />
+        <strong>Lo pequeño cuenta.</strong>
+        <p>Una revisión a tiempo puede evitar un problema mayor.</p>
+      </aside>
+    </section>
+    <section class="learn-content" aria-labelledby="guides-title">
+      @if (listing(); as state) {
+        @if (state.status === 'ready') {
+          <div class="category-filters" role="group" aria-label="Filtrar guías por categoría">
+            <button
+              type="button"
+              [class.active]="!category()"
+              [attr.aria-pressed]="!category()"
+              (click)="category.set('')"
+            >
+              Todas las guías
+            </button>
+            @for (item of state.data.categories; track item.slug) {
+              <button
+                type="button"
+                [class.active]="category() === item.slug"
+                [attr.aria-pressed]="category() === item.slug"
+                (click)="category.set(item.slug)"
+              >
+                {{ item.name }}
+              </button>
+            }
+          </div>
+        }
+      }
+      <header class="section-header">
+        <div>
+          <h2 id="guides-title" #guidesHeading tabindex="-1">
+            Pequeñas tareas. Grandes resultados.
+          </h2>
+          <p>Empieza por lo sencillo, a tu ritmo y con las herramientas adecuadas.</p>
+        </div>
+        <label class="sr-only" for="learn-search">Buscar guías</label>
+        <div class="learn-search">
+          <app-icon name="search" /><input
+            id="learn-search"
+            #searchBox
+            type="search"
+            [value]="dashboard.search()"
+            (input)="dashboard.search.set(searchBox.value)"
+            placeholder="Buscar por tema…"
+          />
+        </div>
+      </header>
+      @if (listing(); as state) {
+        @if (state.status === 'loading') {
+          <p class="loading-state" role="status">Cargando las guías…</p>
+        } @else if (state.status === 'error') {
+          <div class="error-card">
+            <p role="alert">{{ state.message }}</p>
+            <button class="button secondary" type="button" (click)="clearSearch()">
+              Intentar de nuevo
+            </button>
+          </div>
+        } @else {
+          @if (articles().length) {
+            <div class="article-grid">
+              @for (article of articles(); track article.slug) {
+                <article class="article-card">
+                  <div
+                    class="article-cover"
+                    [class.cool]="article.category.slug === 'climatizacion'"
+                    [class.warm]="
+                      article.category.slug === 'seguridad' || article.category.slug === 'equipos'
+                    "
+                    aria-hidden="true"
+                  >
+                    <app-icon [name]="categoryIcon(article.category.slug)" />
+                    <span>{{ $index + 1 < 10 ? '0' : '' }}{{ $index + 1 }}</span>
+                  </div>
+                  <span class="article-category">{{ article.category.name }}</span>
+                  <h3>
+                    <button type="button" class="article-title" (click)="openArticle(article.slug)">
+                      {{ article.title }}
+                    </button>
+                  </h3>
+                  <p>{{ article.summary }}</p>
+                  <footer>
+                    <span>{{ article.readMinutes }} min de lectura</span
+                    ><button
+                      type="button"
+                      (click)="openArticle(article.slug)"
+                      [attr.aria-label]="'Leer guía: ' + article.title"
+                    >
+                      Leer guía <app-icon name="arrow" />
+                    </button>
+                  </footer>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="empty-guides">
+              <span class="empty-icon"><app-icon name="search" /></span>
+              <h3>No encontramos guías</h3>
+              <p>Prueba con otras palabras o selecciona una categoría distinta.</p>
+              <button type="button" class="button secondary" (click)="clearSearch()">
+                Limpiar búsqueda y filtros
+              </button>
+            </div>
+          }
+        }
+      }
+    </section>
+    <aside class="safety-note" aria-label="Seguridad al realizar mantenimiento">
+      <app-icon name="alert" />
+      <p>
+        <strong>Tu seguridad va primero.</strong> Estas guías son informativas y no sustituyen el
+        manual del fabricante ni la evaluación de un profesional. Detente y solicita ayuda
+        calificada cuando haya riesgo.
+      </p>
+    </aside>
+  </div>
+} @else {
+  @if (articleState(); as state) {
+    @if (state.status === 'loading') {
+      <p class="loading-state" role="status">Cargando guía…</p>
+    } @else if (state.status === 'error') {
+      <section class="article-error">
+        <p class="eyebrow-dark">CENTRO DE CONOCIMIENTO</p>
+        <h1>No pudimos abrir esta guía</h1>
+        <p role="alert">{{ state.message }}</p>
+        <button class="button secondary" type="button" (click)="backToList()">
+          Volver a todas las guías
+        </button>
+      </section>
+    } @else {
+      <article class="article-detail">
+        <button class="back-link" type="button" (click)="backToList()">
+          <app-icon name="arrow" /> Todas las guías
+        </button>
+        <header>
+          <span class="article-category">{{ state.article.category.name }}</span>
+          <h1>{{ state.article.title }}</h1>
+          <p class="article-summary">{{ state.article.summary }}</p>
+          <span class="read-time">{{ state.article.readMinutes }} min de lectura</span>
+        </header>
+        <div class="article-body">
+          @for (paragraph of state.article.content; track $index) {
+            <p>{{ paragraph }}</p>
+          }
+        </div>
+        <aside class="article-safety" aria-labelledby="article-safety-title">
+          <app-icon name="alert" />
+          <div>
+            <h2 id="article-safety-title">Antes de empezar</h2>
+            <p>{{ state.article.safety }}</p>
+          </div>
+        </aside>
+        <div class="article-next-step">
+          <div>
+            <strong>¿Necesitas organizar una revisión?</strong
+            ><span>Programa una actividad preventiva para tu propiedad.</span>
+          </div>
+          <a class="button primary" routerLink="/app/maintenance"
+            ><app-icon name="calendar" /> Ver mantenimiento</a
+          >
+        </div>
+      </article>
+    }
+  }
+}

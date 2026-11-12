@@ -1,0 +1,170 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow-dark">SEGUIMIENTO PREVENTIVO</p>
+    <h1 #pageHeading tabindex="-1">Reportes</h1>
+    <p class="muted">
+      Indicadores de tus tareas y propiedades durante {{ monthLabel() || 'el mes actual' }}.
+    </p>
+  </div>
+</header>
+@if (state().status === 'loading') {
+  <p class="loading-state" role="status">Preparando tus indicadores…</p>
+} @else if (state(); as state) {
+  @if (state.status === 'error') {
+    <section class="panel error-state">
+      <h2>No pudimos generar tus reportes</h2>
+      <p class="notice" role="alert">{{ state.message }}</p>
+      <button class="button primary" type="button" (click)="refresh()">Reintentar</button>
+    </section>
+  }
+}
+@if (summary(); as data) {
+  <section class="report-toolbar" aria-label="Filtros de reportes">
+    <div>
+      <span class="report-period">PERÍODO</span>
+      <strong>{{ monthLabel() }}</strong>
+      <span class="report-updated"
+        >Actualizado {{ dateLabel(data.generatedAt, data.timeZone) }}</span
+      >
+    </div>
+    <label class="sr-only" for="report-property-filter">Filtrar reportes por propiedad</label>
+    <select
+      id="report-property-filter"
+      #propertySelect
+      [value]="propertyId()"
+      (change)="propertyId.set(propertySelect.value)"
+    >
+      <option value="">Todas las propiedades</option>
+      @for (property of data.properties; track property.id) {
+        <option [value]="property.id">{{ property.name }}</option>
+      }
+    </select>
+  </section>
+  @if (data.metrics.propertyCount) {
+    <section class="report-metrics" aria-label="Indicadores del período">
+      <article>
+        <div class="metric-label">Tareas este mes <app-icon name="calendar" /></div>
+        <strong>{{ data.metrics.monthlyTasks }}</strong>
+        <p>{{ data.metrics.completedMonthly }} completadas · {{ outstandingTasks() }} pendientes</p>
+      </article>
+      <article class="attention-metric">
+        <div class="metric-label">Requieren atención <app-icon name="alert" /></div>
+        <strong>{{ data.metrics.attentionCount }}</strong>
+        <p>
+          {{ data.metrics.overdue }} vencidas · {{ data.metrics.highPriority }} de prioridad alta
+        </p>
+      </article>
+      <article>
+        <div class="metric-label">Cumplimiento preventivo <app-icon name="chart" /></div>
+        <strong>{{
+          data.metrics.compliance === null ? '—' : data.metrics.compliance + '%'
+        }}</strong>
+        <p>
+          @if (data.metrics.complianceChange !== null) {
+            <span class="change-value" [class.negative]="data.metrics.complianceChange < 0">
+              {{ data.metrics.complianceChange > 0 ? '+' : '' }}{{ data.metrics.complianceChange }}
+              puntos frente al mes anterior
+            </span>
+          } @else {
+            {{
+              data.metrics.compliance === null
+                ? 'Sin tareas preventivas este mes'
+                : 'Sin referencia del mes anterior'
+            }}
+          }
+        </p>
+      </article>
+      <article>
+        <div class="metric-label">Propiedades visibles <app-icon name="home" /></div>
+        <strong>{{ data.metrics.propertyCount }}</strong>
+        <p>Según los permisos de tu espacio</p>
+      </article>
+    </section>
+    <div class="reports-grid">
+      <section class="report-panel completion-panel" aria-labelledby="completion-title">
+        <header>
+          <div>
+            <span class="overline">AVANCE GENERAL</span>
+            <h2 id="completion-title">Tareas completadas</h2>
+          </div>
+          @if (taskCompletion() !== null) {
+            <strong class="completion-value">{{ taskCompletion() }}%</strong>
+          }
+        </header>
+        @if (taskCompletion() !== null) {
+          <progress
+            [value]="taskCompletion() ?? 0"
+            max="100"
+            aria-label="Porcentaje de tareas completadas durante el mes"
+          ></progress>
+          <p>
+            {{ data.metrics.completedMonthly }} de {{ data.metrics.monthlyTasks }} tareas del
+            período completadas.
+          </p>
+        } @else {
+          <div class="no-report-data">
+            <app-icon name="calendar" />
+            <p>No hay tareas registradas para este período.</p>
+          </div>
+        }
+      </section>
+      <section class="report-panel breakdown-panel" aria-labelledby="breakdown-title">
+        <header class="panel-heading">
+          <div>
+            <h2 id="breakdown-title">Cumplimiento por propiedad</h2>
+            <p>Tareas preventivas completadas respecto al total del mes.</p>
+          </div>
+          <span>{{ propertyRows().length }} propiedades</span>
+        </header>
+        @if (propertyRows().length) {
+          <ul class="property-breakdown">
+            @for (property of propertyRows(); track property.id) {
+              <li>
+                <div class="property-label">
+                  <span>{{ property.name }}</span>
+                  @if (compliance(property) !== null) {
+                    <strong>{{ compliance(property) }}%</strong>
+                  } @else {
+                    <strong aria-label="Sin tareas preventivas">—</strong>
+                  }
+                </div>
+                @if (compliance(property) !== null) {
+                  <progress
+                    [value]="compliance(property) ?? 0"
+                    max="100"
+                    [attr.aria-label]="'Cumplimiento preventivo de ' + property.name"
+                  ></progress>
+                  <small
+                    >{{ property.preventiveCompleted }} de
+                    {{ property.preventiveTotal }} completadas</small
+                  >
+                } @else {
+                  <small>Sin tareas preventivas programadas este mes.</small>
+                }
+              </li>
+            }
+          </ul>
+        } @else {
+          <div class="no-report-data">
+            <app-icon name="search" />
+            <p>No encontramos propiedades con ese filtro.</p>
+          </div>
+        }
+      </section>
+    </div>
+    <p class="report-note">
+      <app-icon name="help" />
+      Los porcentajes preventivos se calculan con tareas asociadas a planes. Este reporte muestra el
+      período actual y la referencia disponible del mes anterior; no representa un historial anual.
+    </p>
+  } @else {
+    <section class="empty-state">
+      <span class="empty-icon"><app-icon name="chart" /></span>
+      <h2>Aún no hay datos para reportar.</h2>
+      <p>Registra una propiedad y organiza tus primeras tareas para empezar a ver tus avances.</p>
+      <a class="button primary" routerLink="/app/properties"
+        ><app-icon name="home" /> Ver propiedades</a
+      >
+    </section>
+  }
+}

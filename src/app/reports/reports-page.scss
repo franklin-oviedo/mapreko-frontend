@@ -1,0 +1,169 @@
+.report-toolbar > div {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 0.35rem 0.65rem;
+}
+.report-period {
+  color: var(--forest);
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.report-toolbar strong {
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+.report-updated {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+.report-metrics article > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+.report-metrics .attention-metric > strong {
+  color: #906524;
+}
+.change-value {
+  color: #356047;
+}
+.change-value.negative {
+  color: #9b4936;
+}
+.reports-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.report-panel > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+.report-panel h2 {
+  margin: 0.45rem 0 0;
+  font-size: 1rem;
+}
+.report-panel .overline {
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.report-panel.completion-panel {
+  background: var(--forest);
+  color: white;
+}
+.completion-panel .overline {
+  color: var(--lime);
+}
+.completion-value {
+  color: var(--lime);
+  font-size: 1.6rem;
+}
+progress {
+  display: block;
+  appearance: none;
+  width: 100%;
+  height: 0.4rem;
+  margin: 1.2rem 0 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--progress-track, #edf0e6);
+}
+progress::-webkit-progress-bar {
+  background: var(--progress-track, #edf0e6);
+}
+progress::-webkit-progress-value {
+  background: #1b715a;
+}
+progress::-moz-progress-bar {
+  background: #1b715a;
+}
+.completion-panel progress::-webkit-progress-value {
+  background: var(--lime);
+}
+.completion-panel progress::-moz-progress-bar {
+  background: var(--lime);
+}
+.completion-panel progress::-webkit-progress-bar {
+  background: var(--surface-sidebar, #244e42);
+}
+.completion-panel > p {
+  font-size: 0.7rem;
+  margin: 0.6rem 0 0;
+  color: #e0e8dc;
+}
+.report-panel .panel-heading h2 {
+  margin: 0 0 0.4rem;
+}
+.report-panel .panel-heading p {
+  max-width: 24rem;
+  color: var(--muted);
+  font-size: 0.65rem;
+  margin: 0;
+}
+.report-panel .panel-heading > span {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+.property-breakdown {
+  list-style: none;
+  margin: 0.8rem 0 0;
+  padding: 0;
+}
+.property-breakdown li {
+  padding: 1rem 0;
+  border-top: 1px solid var(--border);
+}
+.property-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+}
+.property-label span {
+  overflow-wrap: anywhere;
+}
+.property-label strong {
+  flex-shrink: 0;
+}
+.property-breakdown progress {
+  margin-top: 0.6rem;
+}
+.property-breakdown small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.65rem;
+  margin-top: 0.35rem;
+}
+.no-report-data {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1.5rem 0 0.5rem;
+}
+.no-report-data p {
+  font-size: 0.75rem;
+  margin: 0;
+}
+@media (max-width: 960px) {
+  .reports-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .report-toolbar select {
+    width: 100%;
+  }
+  .report-panel .panel-heading {
+    flex-wrap: wrap;
+  }
+}

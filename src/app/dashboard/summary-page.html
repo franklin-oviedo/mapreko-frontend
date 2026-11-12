@@ -1,0 +1,139 @@
+<header class="page-heading summary-toolbar">
+  <div>
+    <p class="eyebrow-dark date-line">{{ date() || 'TU ESPACIO, EN UN VISTAZO' }}</p>
+    <h1 tabindex="-1">Todo bajo control, {{ name() }}</h1>
+    <p class="welcome">Un vistazo al bienestar de tus propiedades.</p>
+  </div>
+  <div class="summary-actions">
+    <label class="sr-only" for="property-filter">Filtrar por propiedad</label>
+    <select
+      id="property-filter"
+      #propertyFilter
+      [value]="propertyId()"
+      [disabled]="state().status !== 'ready'"
+      (change)="propertyId.set(propertyFilter.value)"
+    >
+      <option value="">Todas las propiedades</option>
+      @for (property of properties(); track property.id) {
+        <option [value]="property.id">{{ property.name }}</option>
+      }
+    </select>
+    <button
+      #newTaskButton
+      class="button primary"
+      type="button"
+      [disabled]="!writableProperties().length"
+      (click)="createDialog().open('task', propertyId())"
+    >
+      <app-icon name="plus" /> Nueva tarea
+    </button>
+  </div>
+</header>
+@if (success()) {
+  <p class="success" role="status">{{ success() }}</p>
+}
+@if (state().status === 'loading') {
+  <section class="loading-state" role="status">Consultando tus propiedades y tareas…</section>
+}
+@if (state(); as state) {
+  @if (state.status === 'error') {
+    <section class="panel error-state">
+      <app-icon name="alert" />
+      <h2>No pudimos cargar tu resumen</h2>
+      <p class="notice" role="alert">{{ state.message }}</p>
+      <button class="button primary" type="button" (click)="refresh()">Reintentar</button>
+      <button class="text-button" type="button" (click)="resetFilters()">Quitar filtros</button>
+    </section>
+  }
+}
+@if (summary(); as data) {
+  <section class="prevention-banner" aria-labelledby="prevention-title">
+    <div>
+      <span class="overline">TU TRANQUILIDAD, PRIMERO</span>
+      <h2 id="prevention-title">Prevenir hoy es ahorrar mañana.</h2>
+      <p>
+        @if (data.metrics.attentionCount) {
+          Tienes {{ data.metrics.attentionCount }}
+          {{ data.metrics.attentionCount === 1 ? 'tarea prioritaria' : 'tareas prioritarias' }}.
+          Empieza por las que necesitan atención.
+        } @else {
+          No tienes tareas prioritarias pendientes. Cada pequeño cuidado cuenta.
+        }
+      </p>
+    </div>
+    <button type="button" class="banner-link" (click)="review()">
+      Revisar pendientes <app-icon name="arrow" />
+    </button>
+  </section>
+  <app-summary-metrics id="metrics" [metrics]="data.metrics" />
+  @if (!properties().length) {
+    <section class="empty-properties" aria-labelledby="empty-properties-title">
+      <span class="empty-icon"><app-icon name="home" /></span>
+      <h2 id="empty-properties-title">El cuidado de tu espacio empieza aquí.</h2>
+      <p>Registra una propiedad y crea tu primera tarea. Tus avances aparecerán en este resumen.</p>
+      @if (canCreateProperty()) {
+        <button class="button primary" type="button" (click)="createDialog().open('property')">
+          <app-icon name="plus" /> Registrar mi primera propiedad
+        </button>
+      } @else {
+        <p class="muted small">
+          El propietario o un administrador de tu espacio puede registrar propiedades.
+        </p>
+      }
+    </section>
+  } @else if (!writableProperties().length) {
+    <p class="notice">
+      Tu acceso a estas propiedades es de solo lectura. Puedes consultar el resumen, pero no crear
+      tareas.
+    </p>
+  }
+  <div class="detail-grid">
+    <app-summary-tasks
+      id="tasks"
+      [tasks]="data.tasks"
+      [now]="data.generatedAt"
+      [search]="client.search()"
+      [attentionOnly]="attentionOnly()"
+      (cleared)="clearTaskFilters()"
+      (selected)="openTask($event)"
+    />
+    <app-property-health
+      id="properties"
+      [properties]="properties()"
+      [propertyId]="propertyId()"
+      [search]="client.search()"
+      (selected)="propertyId.set($event)"
+    />
+  </div>
+  <section class="learn-banner" id="learn" aria-labelledby="learn-title">
+    <div>
+      <span class="overline">APRENDE CON MAPREKO</span>
+      <h2 id="learn-title">Hay cosas que puedes hacer tú.</h2>
+      <p>Guías sencillas para cuidar tu hogar, con seguridad y a tu ritmo.</p>
+    </div>
+    <a class="button learn-link" routerLink="/app/learn"
+      >Explorar las guías <app-icon name="arrow"
+    /></a>
+  </section>
+  <footer class="summary-footer">
+    Datos reales · Vista general de {{ data.metrics.propertyCount }}
+    {{ data.metrics.propertyCount === 1 ? 'propiedad' : 'propiedades' }}
+    <span class="sr-only"
+      >Indicadores de {{ month() }} · Cumplimiento de tareas preventivas del mes.</span
+    >
+  </footer>
+}
+<app-create-dialog [properties]="properties()" (created)="created($event)" />
+<dialog #detailDialog class="task-dialog" aria-labelledby="task-detail-title">
+  <span class="overline">DETALLE DE TAREA</span>
+  <h2 id="task-detail-title" #detailHeading tabindex="-1">{{ details()?.title }}</h2>
+  @if (details(); as task) {
+    <p class="muted">{{ task.propertyName }}</p>
+    <p [class.overdue-text]="isOverdue(task)">{{ dueLabel(task) }} · {{ task.timeZone }}</p>
+    <p>{{ task.description || 'Esta tarea no tiene detalles adicionales.' }}</p>
+    <p class="muted small">
+      Estado: {{ task.status === 'in_progress' ? 'En progreso' : 'Pendiente' }}
+    </p>
+  }
+  <button class="button primary" type="button" (click)="closeTask()">Cerrar</button>
+</dialog>

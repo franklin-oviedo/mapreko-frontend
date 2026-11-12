@@ -1,0 +1,146 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+.login-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100dvh;
+}
+.login-story {
+  background: var(--forest);
+  color: var(--cream);
+  padding: 3rem 10%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.brand {
+  color: inherit;
+}
+.story-copy {
+  margin-block: 4rem;
+  max-width: 29rem;
+}
+.eyebrow {
+  color: var(--lime);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+h2 {
+  font-size: clamp(2.2rem, 3.8vw, 3.8rem);
+  line-height: 1.12;
+  font-weight: 500;
+  letter-spacing: -0.05em;
+  margin-block: 1.4rem;
+}
+.story-copy > p {
+  line-height: 1.8;
+  max-width: 25rem;
+  color: #d3e2d9;
+}
+.home-outline {
+  width: 13rem;
+  margin: 3rem auto;
+  color: #b6cabc;
+}
+.status-dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  background: var(--lime);
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+.story-note,
+.story-footer {
+  font-size: 0.75rem;
+  color: #d3e2d9;
+}
+.login-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 12%;
+  background: var(--cream);
+}
+.login-card {
+  width: 100%;
+  max-width: 26rem;
+}
+.login-card h1 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+  letter-spacing: -0.045em;
+  margin-block: 1.3rem;
+  line-height: 1.15;
+}
+.login-card > .muted {
+  line-height: 1.7;
+}
+.google-button {
+  width: 100%;
+  margin-top: 1.7rem;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--ink);
+  gap: 0.9rem;
+}
+.google-letter {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #285d46;
+}
+.login-privacy {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-top: 1rem;
+  text-align: center;
+}
+.login-divider {
+  border-top: 1px solid var(--border);
+  margin-block: 2rem;
+}
+.text-link {
+  font-size: 0.85rem;
+}
+.login-footer {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-top: 4rem;
+}
+.login-legal {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: center;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.62rem;
+}
+.login-legal nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.login-legal a {
+  color: var(--forest);
+}
+@media (max-width: 760px) {
+  .login-layout {
+    grid-template-columns: 1fr;
+  }
+  .login-story {
+    padding: 1.5rem;
+  }
+  .story-copy,
+  .story-footer {
+    display: none;
+  }
+  .login-content {
+    padding: 3rem 1.5rem;
+    min-height: calc(100dvh - 5rem);
+  }
+}
