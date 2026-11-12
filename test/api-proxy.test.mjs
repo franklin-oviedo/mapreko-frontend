@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { onRequest } from '../functions/api/_middleware.ts';
+import worker from '../worker.ts';
 
 test('preserves OAuth redirects and cookies instead of following them at the edge', async (t) => {
   const response = new Response(null, {
@@ -53,4 +54,49 @@ test('preserves authenticated request bodies, headers and query parameters', asy
   });
 
   assert.equal(result.status, 204);
+});
+
+test('Worker routes API requests to Render instead of the SPA fallback', async (t) => {
+  const response = new Response('{"googleConfigured":false}', {
+    headers: { 'Content-Type': 'application/json' },
+  });
+  const assets = t.mock.fn(() => {
+    throw new Error('API requests must not return Angular HTML');
+  });
+  const proxy = t.mock.method(globalThis, 'fetch', async (request, options) => {
+    assert.ok(request.url.startsWith('https://api.example.com/api'));
+    assert.equal(options.redirect, 'manual');
+    return response;
+  });
+  for (const path of ['/api', '/api/auth/config']) {
+    assert.equal(
+      await worker.fetch(new Request(`https://app.example.com${path}`), {
+        API_ORIGIN: 'https://api.example.com',
+        ASSETS: { fetch: assets },
+      }),
+      response,
+    );
+  }
+  assert.equal(assets.mock.callCount(), 0);
+  assert.equal(proxy.mock.callCount(), 2);
+});
+
+test('Worker serves assets and Angular routes without requiring an API origin', async (t) => {
+  const response = new Response('<html>MAPREKO</html>');
+  const assets = t.mock.fn(async () => response);
+  const proxy = t.mock.method(globalThis, 'fetch', () => {
+    throw new Error('Frontend requests must not reach Render');
+  });
+  for (const path of ['/', '/app/properties', '/styles.css', '/api-example']) {
+    const request = new Request(`https://app.example.com${path}`);
+    assert.equal(
+      await worker.fetch(request, {
+        API_ORIGIN: '',
+        ASSETS: { fetch: assets },
+      }),
+      response,
+    );
+    assert.equal(assets.mock.calls.at(-1).arguments[0], request);
+  }
+  assert.equal(proxy.mock.callCount(), 0);
 });

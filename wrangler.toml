@@ -1,3 +1,10 @@
 name = "mapreko-frontend"
 compatibility_date = "2026-11-12"
-pages_build_output_dir = "./dist/mapreko/browser"
+main = "./worker.ts"
+keep_vars = true
+
+[assets]
+directory = "./dist/mapreko/browser"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api", "/api/*"]
